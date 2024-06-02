@@ -41,6 +41,7 @@ from .utils import (
     PasteOrientation,
     PasteType,
     T,
+    TableDirection,
     ValidationConditionType,
     ValueInputOption,
     ValueRenderOption,
@@ -53,6 +54,7 @@ from .utils import (
     convert_colors_to_hex_value,
     convert_hex_to_colors_dict,
     fill_gaps,
+    find_table,
     finditem,
     get_a1_from_absolute_range,
     is_full_a1_notation,
@@ -3336,3 +3338,48 @@ class Worksheet:
         }
 
         return self.client.batch_update(self.spreadsheet_id, body)
+
+    def expand_table(
+        self,
+        direction: TableDirection,
+        start_range: str = "A1",
+    ) -> List[List[str]]:
+        """Expands a cell range based on non-null adjacent cells.
+
+        Expand can be done in 3 directions defined in :class:`~gspread.utils.TableDirection`
+
+            * ``TableDirection.right``: expands only same row as starting cell on the right side up to
+              first null/empty cell
+            * ``TableDirection.down``: expands only same column as starting cell to the bottom up to
+              first null/empty cell
+            * ``TableDirection.table``: expands in both direction, first right then down.
+
+        Regardless of the direction this function always returns a matrix of data, even if it has
+        only one column.
+
+        Example::
+
+            values = [
+                ['', '',   '',   '', ''  ],
+                ['', 'B2', 'C2', '', 'E2'],
+                ['', 'B3', 'C3', '', 'E3'],
+                ['', ''  , ''  , '', 'E4'],
+            ]
+            >>> worksheet.expand_table(TableDirection.table, 'B2')
+            [
+                ['B2', 'C2'],
+                ['B3', 'C3'],
+            ]
+
+
+        .. note::
+
+           the ``TableDirection.table`` will first look right, then look down.
+           Any empty value in the midle of the table will be ignored.
+
+        :param gspread.utils.TableDirection direction: the expand direction
+        :param str start_range: the starting cell range.
+        :rtype list(list): the resulting matrix
+        """
+
+        return find_table(self.get(), direction, start_range)
