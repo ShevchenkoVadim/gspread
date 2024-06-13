@@ -514,31 +514,43 @@ class UtilsTest(unittest.TestCase):
             ["", "", "", "", "D4"],
         ]
 
-        # table = utils.find_table(values, utils.TableDirection.table, "B2")
-        # right = utils.find_table(values, utils.TableDirection.right, "B2")
-        # down = utils.find_table(values, utils.TableDirection.down, "B2")
-        single = utils.find_table(values, utils.TableDirection.table, "C3")
-        no_values = utils.find_table(values, utils.TableDirection.table, "A2")
+        table = utils.find_table(
+            values,
+            "B2",
+            utils.TableDirection.table,
+        )
+        right = utils.find_table(
+            values,
+            "B2",
+            utils.TableDirection.right,
+        )
+        down = utils.find_table(
+            values,
+            "B2",
+            utils.TableDirection.down,
+        )
+        single = utils.find_table(values, "C3", utils.TableDirection.table)
+        no_values = utils.find_table(values, "A2", utils.TableDirection.table)
 
-        # table_values = [
-        #     ["B2", "C2"],
-        #     ["B3", "C3"],
-        # ]
-        # for row in range(len(table)):
-        #     self.assertListEqual(table[row], table_values[row])
+        table_values = [
+            ["B2", "C2"],
+            ["B3", "C3"],
+        ]
+        for row in range(len(table)):
+            self.assertListEqual(table[row], table_values[row])
 
-        # right_values = [
-        #     ["B2", "C2"],
-        # ]
-        # for row in range(len(right)):
-        #     self.assertListEqual(right[row], right_values[row])
+        right_values = [
+            ["B2", "C2"],
+        ]
+        for row in range(len(right)):
+            self.assertListEqual(right[row], right_values[row])
 
-        # bottom_values = [
-        #     ["B2"],
-        #     ["B3"],
-        # ]
-        # for row in range(len(down)):
-        #     self.assertListEqual(down[row], bottom_values[row])
+        bottom_values = [
+            ["B2"],
+            ["B3"],
+        ]
+        for row in range(len(down)):
+            self.assertListEqual(down[row], bottom_values[row])
 
         self.assertEqual(single[0][0], "C3")
         self.assertEqual(no_values, [])

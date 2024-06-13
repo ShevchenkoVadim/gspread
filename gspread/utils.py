@@ -986,7 +986,15 @@ def to_records(
 
 
 def _expand_right(values: List[List[str]], start: int, end: int, row: int) -> int:
-    # find rightmost value
+    """This is a private function, returning the column index of the first empty cell
+    on the given row.
+
+    Search starts from ``start`` index column.
+    Search ends on ``end`` index column.
+    Searches only in the row pointed by ``row``.
+
+    If no empty value is found, it will return the given ``end`` index.
+    """
     for column in range(start, end):
         if values[row][column] == "":
             return column
@@ -995,9 +1003,16 @@ def _expand_right(values: List[List[str]], start: int, end: int, row: int) -> in
 
 
 def _expand_bottom(values: List[List[str]], start: int, end: int, col: int) -> int:
-    # find the bottommost value
+    """This is a private function, returning the row index of the first empty cell
+    on the given column.
+
+    Search starts from ``start`` index row.
+    Search ends on ``end`` index row.
+    Searches only in the column pointed by ``col``.
+
+    If no empty value is found, it will return the given ``end`` index.
+    """
     for rows in range(start, end):
-        print("bottom check row: {} col {}".format(rows, col))
         if values[rows][col] == "":
             return rows
 
@@ -1005,7 +1020,9 @@ def _expand_bottom(values: List[List[str]], start: int, end: int, col: int) -> i
 
 
 def find_table(
-    values: List[List[str]], direction: TableDirection, start_range: str
+    values: List[List[str]],
+    start_range: str,
+    direction: TableDirection = TableDirection.table,
 ) -> List[List[str]]:
     """Expands a list of values based on non-null adjacent cells.
 
@@ -1038,7 +1055,8 @@ def find_table(
     .. note::
 
        the ``TableDirection.table`` will first look right, then look down.
-       Any empty value in the midle of the table will be ignored.
+       It will not check cells located inside the table. This could lead to
+       potential empty values located in the middle of the table.
 
     :param list[list] values: values where to find the table.
     :param gspread.utils.TableDirection direction: the expand direction.
@@ -1061,7 +1079,6 @@ def find_table(
 
     if direction == TableDirection.table:
         rightMost = _expand_right(values, col, len(values[row]), row)
-        print("found right: {}".format(rightMost))
 
         checkColumn = rightMost
         if checkColumn != 0:

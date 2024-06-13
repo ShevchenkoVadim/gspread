@@ -3339,10 +3339,12 @@ class Worksheet:
 
         return self.client.batch_update(self.spreadsheet_id, body)
 
-    def expand_table(
+    def expand(
         self,
-        direction: TableDirection,
-        start_range: str = "A1",
+        top_left_range_name: str = "A1",
+        direction: TableDirection = TableDirection.table,
+        value_render_option: Optional[ValueRenderOption] = None,
+        date_time_render_option: Optional[DateTimeOption] = None,
     ) -> List[List[str]]:
         """Expands a cell range based on non-null adjacent cells.
 
@@ -3360,26 +3362,33 @@ class Worksheet:
         Example::
 
             values = [
-                ['', '',   '',   '', ''  ],
-                ['', 'B2', 'C2', '', 'E2'],
-                ['', 'B3', 'C3', '', 'E3'],
-                ['', ''  , ''  , '', 'E4'],
+                ['', '',   '',   ''  , ''  , ''],
+                ['', 'B2', 'C2', 'D2', ''  , 'F2'],
+                ['', 'B3', ''  , 'D3', ''  , 'F3'],
+                ['', 'B4', 'C4', 'D4', ''  , 'F4'],
+                ['', ''  , ''  , ''  , ''  , 'F5'],
             ]
             >>> worksheet.expand_table(TableDirection.table, 'B2')
             [
-                ['B2', 'C2'],
-                ['B3', 'C3'],
+                ['B2', 'C2', 'D2],
+                ['B3', ''  , 'D3'],
+                ['B4', 'C4', 'D4'],
             ]
 
 
         .. note::
 
-           the ``TableDirection.table`` will first look right, then look down.
-           Any empty value in the midle of the table will be ignored.
+            the ``TableDirection.table`` will first look right, then look down.
+            It will not check cells located inside the table. This could lead to
+            potential empty values located in the middle of the table.
 
         :param gspread.utils.TableDirection direction: the expand direction
         :param str start_range: the starting cell range.
         :rtype list(list): the resulting matrix
         """
 
-        return find_table(self.get(), direction, start_range)
+        values = self.get(
+            value_render_option=value_render_option,
+            date_time_render_option=date_time_render_option,
+        )
+        return find_table(values, top_left_range_name, direction)
