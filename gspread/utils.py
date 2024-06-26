@@ -996,6 +996,10 @@ def _expand_right(values: List[List[str]], start: int, end: int, row: int) -> in
     If no empty value is found, it will return the given ``end`` index.
     """
     for column in range(start, end):
+        # in case the given row is smaller that what is being asked
+        if column >= len(values[row]):
+            return len(values[row]) - 1
+
         if values[row][column] == "":
             return column
 
@@ -1013,6 +1017,14 @@ def _expand_bottom(values: List[List[str]], start: int, end: int, col: int) -> i
     If no empty value is found, it will return the given ``end`` index.
     """
     for rows in range(start, end):
+        # in case we try to look further than last row
+        if rows >= len(values):
+            return len(values) - 1
+
+        # this row is smaller than the others, just keep looking
+        if col >= len(values[rows]):
+            continue
+
         if values[rows][col] == "":
             return rows
 
@@ -1028,11 +1040,9 @@ def find_table(
 
     Expand can be done in 3 directions defined in :class:`~gspread.utils.TableDirection`
 
-        * ``TableDirection.right``: expands only same row as starting cell on the right side up to
-          first null/empty cell
-        * ``TableDirection.down``: expands only same column as starting cell to the bottom up to
-          first null/empty cell
-        * ``TableDirection.table``: expands in both direction, first right then down.
+        * ``TableDirection.right``: expands right until the first empty cell
+        * ``TableDirection.down``: expands down until the first empty cell
+        * ``TableDirection.table``: expands right until the first empty cell, then down until the first empty cell
 
     Regardless of the direction this function always returns a matrix of data, even if it has
     only one column.
@@ -1057,6 +1067,10 @@ def find_table(
        the ``TableDirection.table`` will first look right, then look down.
        It will not check cells located inside the table. This could lead to
        potential empty values located in the middle of the table.
+
+    .. warning::
+
+       Given values must be padded with `''` empty values.
 
     :param list[list] values: values where to find the table.
     :param gspread.utils.TableDirection direction: the expand direction.

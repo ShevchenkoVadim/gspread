@@ -3343,18 +3343,14 @@ class Worksheet:
         self,
         top_left_range_name: str = "A1",
         direction: TableDirection = TableDirection.table,
-        value_render_option: Optional[ValueRenderOption] = None,
-        date_time_render_option: Optional[DateTimeOption] = None,
     ) -> List[List[str]]:
         """Expands a cell range based on non-null adjacent cells.
 
         Expand can be done in 3 directions defined in :class:`~gspread.utils.TableDirection`
 
-            * ``TableDirection.right``: expands only same row as starting cell on the right side up to
-              first null/empty cell
-            * ``TableDirection.down``: expands only same column as starting cell to the bottom up to
-              first null/empty cell
-            * ``TableDirection.table``: expands in both direction, first right then down.
+        * ``TableDirection.right``: expands right until the first empty cell
+        * ``TableDirection.down``: expands down until the first empty cell
+        * ``TableDirection.table``: expands right until the first empty cell, then down until the first empty cell
 
         Regardless of the direction this function always returns a matrix of data, even if it has
         only one column.
@@ -3382,13 +3378,16 @@ class Worksheet:
             It will not check cells located inside the table. This could lead to
             potential empty values located in the middle of the table.
 
+        .. note::
+
+            when it is necessary to use non-default options for :meth:`~gspread.worksheet.Worksheet.get`,
+            please get the data first using desired options then use the function
+            :func:`gspread.utils.find_table` to extract the desired table.
+
+        :param str top_left_range_name: the top left corner of the table to expand.
         :param gspread.utils.TableDirection direction: the expand direction
-        :param str start_range: the starting cell range.
         :rtype list(list): the resulting matrix
         """
 
-        values = self.get(
-            value_render_option=value_render_option,
-            date_time_render_option=date_time_render_option,
-        )
+        values = self.get(pad_values=True)
         return find_table(values, top_left_range_name, direction)
