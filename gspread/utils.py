@@ -995,15 +995,10 @@ def _expand_right(values: List[List[str]], start: int, end: int, row: int) -> in
 
     If no empty value is found, it will return the given ``end`` index.
     """
-    for column in range(start, end):
-        # in case the given row is smaller that what is being asked
-        if column >= len(values[row]):
-            return len(values[row]) - 1
-
-        if values[row][column] == "":
-            return column
-
-    return end
+    try:
+        return values[row].index('""', start, end)
+    except ValueError:
+        return end
 
 
 def _expand_bottom(values: List[List[str]], start: int, end: int, col: int) -> int:
@@ -1021,11 +1016,8 @@ def _expand_bottom(values: List[List[str]], start: int, end: int, col: int) -> i
         if rows >= len(values):
             return len(values) - 1
 
-        # this row is smaller than the others, just keep looking
-        if col >= len(values[rows]):
-            continue
-
-        if values[rows][col] == "":
+        # check if cell is empty (or the row => empty cell)
+        if col >= len(values[rows]) or values[rows][col] == "":
             return rows
 
     return end
@@ -1092,8 +1084,8 @@ def find_table(
         bottomMost = row + 1
 
     if direction == TableDirection.table:
-        rightMost = _expand_right(values, col, len(values[row]), row)
         bottomMost = _expand_bottom(values, row, len(values), col)
+        rightMost = _expand_right(values, col, len(values[bottomMost]), bottomMost)
 
     result = []
 
