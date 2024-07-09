@@ -1093,12 +1093,7 @@ def find_table(
 
     if direction == TableDirection.table:
         rightMost = _expand_right(values, col, len(values[row]), row)
-
-        checkColumn = rightMost
-        if checkColumn != 0:
-            checkColumn -= 1
-
-        bottomMost = _expand_bottom(values, row, len(values), checkColumn)
+        bottomMost = _expand_bottom(values, row, len(values), col)
 
     result = []
 
